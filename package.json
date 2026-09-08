@@ -1,0 +1,19 @@
+{
+  "name": "principal-mirage-reviewer-repro",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Reviewer-ready end-to-end reproduction for Principal Mirage: authorization bypass through security-context collapse.",
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "repro": "node dist/repro.js",
+    "server:vulnerable": "node dist/server.js vulnerable",
+    "server:fixed": "node dist/server.js fixed",
+    "test:vulnerable": "node --test dist/tests/vulnerable.test.js",
+    "test:fixed": "node --test dist/tests/fixed.test.js",
+    "test": "npm run build && npm run test:vulnerable && npm run test:fixed",
+    "review": "npm run build && npm run repro && npm run test:vulnerable && npm run test:fixed"
+  },
+  "devDependencies": {"typescript": "5.8.3"}
+}
