@@ -1,0 +1,48 @@
+Principal Mirage v0.2 — reviewer-ready end-to-end reproduction
+All credentials are locally signed by trusted simulated issuers and independently verified before principal-cache lookup.
+The vulnerable resolver is exercised through HTTP-style application routes and policy checks, not direct policy helper calls.
+
+
+=== 1) Cross-issuer principal collision ===
+[verified] corp admin: iss=corp-idp sub=1847 tenant=acme role=admin acr=mfa delegated=false authzVersion=8
+[verified] partner viewer: iss=partner-idp sub=1847 tenant=acme role=viewer acr=password delegated=false authzVersion=3
+[http] seed admin request: status=200 cacheHit=false key=1847 principal=corp-idp/1847/acme/admin/mfa/delegated:false/v8
+[http] partner viewer request: status=200 cacheHit=true key=1847 principal=corp-idp/1847/acme/admin/mfa/delegated:false/v8
+[BYPASS] valid partner viewer credential executed an Acme admin route with the corp admin principal
+
+=== 2) Cross-tenant authorization state reuse ===
+[verified] Acme admin: iss=corp-idp sub=user123 tenant=acme role=admin acr=mfa delegated=false authzVersion=4
+[verified] Globex viewer: iss=corp-idp sub=user123 tenant=globex role=viewer acr=mfa delegated=false authzVersion=2
+[http] seed Acme admin: status=200 cacheHit=false key=user123 principal=corp-idp/user123/acme/admin/mfa/delegated:false/v4
+[http] Globex-only viewer targeting Acme: status=200 cacheHit=true key=user123 principal=corp-idp/user123/acme/admin/mfa/delegated:false/v4
+[BYPASS] Globex viewer inherited Acme admin state and accessed an Acme-only admin route
+
+=== 3) MFA assurance collapse ===
+[verified] MFA admin: iss=corp-idp sub=alice tenant=acme role=admin acr=mfa delegated=false authzVersion=11
+[verified] password-only admin: iss=corp-idp sub=alice tenant=acme role=admin acr=password delegated=false authzVersion=11
+[http] seed MFA request: status=200 cacheHit=false key=alice principal=corp-idp/alice/acme/admin/mfa/delegated:false/v11
+[http] password-only request: status=200 cacheHit=true key=alice principal=corp-idp/alice/acme/admin/mfa/delegated:false/v11
+[BYPASS] password-only credential inherited cached MFA assurance for a sensitive action
+
+=== 4) Delegation context collapse ===
+[verified] delegated support context: iss=corp-idp sub=carol tenant=acme role=admin acr=mfa delegated=true authzVersion=21
+[verified] direct viewer context: iss=corp-idp sub=carol tenant=acme role=viewer acr=mfa delegated=false authzVersion=21
+[http] seed delegated request: status=200 cacheHit=false key=carol principal=corp-idp/carol/acme/admin/mfa/delegated:true/v21
+[http] direct viewer request: status=200 cacheHit=true key=carol principal=corp-idp/carol/acme/admin/mfa/delegated:true/v21
+[BYPASS] direct context inherited privileges valid only during approved support delegation
+
+=== 5) Authorization-version staleness ===
+[verified] pre-revocation admin: iss=corp-idp sub=bob tenant=acme role=admin acr=mfa delegated=false authzVersion=17
+[verified] post-revocation user: iss=corp-idp sub=bob tenant=acme role=user acr=mfa delegated=false authzVersion=18
+[http] seed pre-revocation request: status=200 cacheHit=false key=bob principal=corp-idp/bob/acme/admin/mfa/delegated:false/v17
+[http] post-revocation request: status=200 cacheHit=true key=bob principal=corp-idp/bob/acme/admin/mfa/delegated:false/v17
+[BYPASS] newer downgraded authorization context received stale cached admin state
+
+=== Control: same request chains against fixed resolver ===
+[fixed] cross-issuer: seed=200 follow-up=403
+[fixed] cross-tenant: seed=200 follow-up=403
+[fixed] assurance: seed=200 follow-up=403
+[fixed] delegation: seed=200 follow-up=403
+[fixed] authz-version: seed=200 follow-up=403
+
+PASS: reproduced 5 end-to-end authorization failures and confirmed the reference fix blocks all 5 chains.
