@@ -1,0 +1,107 @@
+=== vulnerable tests ===
+TAP version 13
+# Subtest: cross-issuer viewer inherits admin principal
+ok 1 - cross-issuer viewer inherits admin principal
+  ---
+  duration_ms: 9.130863
+  type: 'test'
+  ...
+# Subtest: cross-tenant viewer inherits Acme admin principal
+ok 2 - cross-tenant viewer inherits Acme admin principal
+  ---
+  duration_ms: 1.460307
+  type: 'test'
+  ...
+# Subtest: password-only session inherits MFA assurance
+ok 3 - password-only session inherits MFA assurance
+  ---
+  duration_ms: 2.654168
+  type: 'test'
+  ...
+# Subtest: direct context inherits delegated support context
+ok 4 - direct context inherits delegated support context
+  ---
+  duration_ms: 1.508326
+  type: 'test'
+  ...
+# Subtest: new authz version inherits stale admin principal
+ok 5 - new authz version inherits stale admin principal
+  ---
+  duration_ms: 1.309288
+  type: 'test'
+  ...
+# Subtest: request order changes which context is incorrectly reused
+ok 6 - request order changes which context is incorrectly reused
+  ---
+  duration_ms: 0.811595
+  type: 'test'
+  ...
+# Subtest: legitimate same-context cache reuse still works
+ok 7 - legitimate same-context cache reuse still works
+  ---
+  duration_ms: 0.579935
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 459.754806
+
+=== fixed tests ===
+TAP version 13
+# Subtest: cross-issuer contexts remain isolated
+ok 1 - cross-issuer contexts remain isolated
+  ---
+  duration_ms: 8.884982
+  type: 'test'
+  ...
+# Subtest: cross-tenant contexts remain isolated
+ok 2 - cross-tenant contexts remain isolated
+  ---
+  duration_ms: 1.351378
+  type: 'test'
+  ...
+# Subtest: MFA state is not reused by password-only context
+ok 3 - MFA state is not reused by password-only context
+  ---
+  duration_ms: 1.678839
+  type: 'test'
+  ...
+# Subtest: delegated support state is not reused by direct context
+ok 4 - delegated support state is not reused by direct context
+  ---
+  duration_ms: 6.143692
+  type: 'test'
+  ...
+# Subtest: newer authorization version does not reuse stale admin state
+ok 5 - newer authorization version does not reuse stale admin state
+  ---
+  duration_ms: 1.479854
+  type: 'test'
+  ...
+# Subtest: request order does not collapse distinct issuer contexts
+ok 6 - request order does not collapse distinct issuer contexts
+  ---
+  duration_ms: 0.873281
+  type: 'test'
+  ...
+# Subtest: legitimate equivalent context is still cacheable
+ok 7 - legitimate equivalent context is still cacheable
+  ---
+  duration_ms: 0.566012
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 440.064169
